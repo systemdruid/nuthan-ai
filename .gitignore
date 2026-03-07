@@ -1,0 +1,23 @@
+# Environment
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Django
+*.log
+
+# Node
+frontend/node_modules/
+frontend/build/
+
+# Docker
+postgres_data/
+
+# macOS
+.DS_Store

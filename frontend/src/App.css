@@ -1,0 +1,239 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+  color: #333;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  font-size: 2.5rem;
+  color: #1a1a2e;
+}
+
+header p {
+  color: #666;
+  margin-top: 6px;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Forms */
+.note-form,
+.query-bar {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.note-form h2,
+.query-bar h2 {
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+button {
+  padding: 10px 18px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: #357abd;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Query form */
+.query-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.query-form input {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.clear-btn {
+  background: #888;
+}
+
+.clear-btn:hover:not(:disabled) {
+  background: #666;
+}
+
+/* Note list */
+.right-panel h2 {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 14px;
+}
+
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Note card */
+.note-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  border: 2px solid transparent;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.note-card.highlighted {
+  border-color: #4a90e2;
+  box-shadow: 0 4px 12px rgba(74,144,226,0.25);
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.note-header h3 {
+  font-size: 1rem;
+  color: #1a1a2e;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.delete-btn {
+  background: transparent;
+  color: #ccc;
+  padding: 2px 8px;
+  font-size: 1.2rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #fee;
+  color: #e53e3e;
+}
+
+.delete-btn.confirm {
+  background: #fed7d7;
+  color: #e53e3e;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+}
+
+.note-content {
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin-bottom: 8px;
+}
+
+.note-date {
+  font-size: 0.78rem;
+  color: #aaa;
+}
+
+/* Query results */
+.query-results {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.query-results h3 {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.explanation {
+  font-size: 0.88rem;
+  color: #666;
+  background: #f0f7ff;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+/* Error */
+.error-banner {
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  color: #c53030;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.empty-message {
+  color: #999;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}

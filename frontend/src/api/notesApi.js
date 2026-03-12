@@ -9,6 +9,8 @@ export const createNote = (data) => axios.post(`${BASE}/`, data).then(r => r.dat
 
 export const deleteNote = (id) => axios.delete(`${BASE}/${id}/`);
 
+export const updateNote = (id, data) => axios.patch(`${BASE}/${id}/`, data).then(r => r.data);
+
 export const queryNotes = (query) =>
   axios.post(`${BASE}/query/`, { query }).then(r => r.data);
 

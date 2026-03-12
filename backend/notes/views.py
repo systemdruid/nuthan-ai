@@ -44,9 +44,20 @@ class NoteListCreateView(generics.ListCreateAPIView):
         _apply_ai_tags(note, note.content)
 
 
-class NoteDetailView(generics.RetrieveDestroyAPIView):
+class NoteDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
+    http_method_names = ['get', 'patch', 'delete']
+
+    def perform_update(self, serializer):
+        note = serializer.save()
+        if 'tag_names' in self.request.data:
+            NoteTag.objects.filter(note=note, source=NoteTag.Source.USER).delete()
+            for name in self.request.data['tag_names']:
+                name = name.lower().strip()
+                if name:
+                    tag, _ = Tag.objects.get_or_create(name=name)
+                    NoteTag.objects.get_or_create(note=note, tag=tag, defaults={'source': NoteTag.Source.USER})
 
 
 class NoteRetagAllView(APIView):

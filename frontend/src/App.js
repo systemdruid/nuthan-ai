@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getNotes, createNote, deleteNote, queryNotes, retagAll } from './api/notesApi';
+import { getNotes, createNote, deleteNote, updateNote, queryNotes, retagAll } from './api/notesApi';
 import NoteForm from './components/NoteForm';
 import NoteList from './components/NoteList';
 import QueryBar from './components/QueryBar';
@@ -48,6 +48,22 @@ function App() {
       setError(null);
     } catch (err) {
       setError('Failed to delete note.');
+    }
+  };
+
+  const handleUpdate = async (id, data) => {
+    try {
+      const updated = await updateNote(id, data);
+      setNotes(prev => prev.map(n => n.id === id ? updated : n));
+      if (queryResults) {
+        setQueryResults(prev => ({
+          ...prev,
+          relevant_notes: prev.relevant_notes.map(n => n.id === id ? updated : n),
+        }));
+      }
+      setError(null);
+    } catch (err) {
+      setError('Failed to update note.');
     }
   };
 
@@ -112,6 +128,7 @@ function App() {
             <NoteList
               notes={notes.filter(n => n.type === 'note')}
               onDelete={handleDelete}
+              onUpdate={handleUpdate}
               highlightedIds={highlightedIds}
               emptyMessage="No notes yet. Add one!"
             />
@@ -121,6 +138,7 @@ function App() {
             <NoteList
               notes={notes.filter(n => n.type === 'task')}
               onDelete={handleDelete}
+              onUpdate={handleUpdate}
               highlightedIds={highlightedIds}
               emptyMessage="No tasks yet."
             />

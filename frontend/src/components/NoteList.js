@@ -1,7 +1,7 @@
 import React from 'react';
 import NoteCard from './NoteCard';
 
-function NoteList({ notes, onDelete, highlightedIds, emptyMessage = 'Nothing here yet.' }) {
+function NoteList({ notes, onDelete, onUpdate, highlightedIds, emptyMessage = 'Nothing here yet.' }) {
   if (notes.length === 0) {
     return <p className="empty-message">{emptyMessage}</p>;
   }
@@ -13,6 +13,7 @@ function NoteList({ notes, onDelete, highlightedIds, emptyMessage = 'Nothing her
           key={note.id}
           note={note}
           onDelete={onDelete}
+          onUpdate={onUpdate}
           highlighted={highlightedIds.includes(note.id)}
         />
       ))}

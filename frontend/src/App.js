@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getNotes, createNote, deleteNote, queryNotes } from './api/notesApi';
+import { getNotes, createNote, deleteNote, queryNotes, retagAll } from './api/notesApi';
 import NoteForm from './components/NoteForm';
 import NoteList from './components/NoteList';
 import QueryBar from './components/QueryBar';
@@ -9,6 +9,7 @@ function App() {
   const [notes, setNotes] = useState([]);
   const [queryResults, setQueryResults] = useState(null);
   const [queryLoading, setQueryLoading] = useState(false);
+  const [retagLoading, setRetagLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchNotes = useCallback(async () => {
@@ -67,6 +68,19 @@ function App() {
     }
   };
 
+  const handleRetagAll = async () => {
+    setRetagLoading(true);
+    try {
+      await retagAll();
+      await fetchNotes();
+      setError(null);
+    } catch (err) {
+      setError('Retag failed.');
+    } finally {
+      setRetagLoading(false);
+    }
+  };
+
   const highlightedIds = queryResults
     ? queryResults.relevant_notes.map(n => n.id)
     : [];
@@ -76,6 +90,9 @@ function App() {
       <header>
         <h1>AI Notes</h1>
         <p>Save notes and find them using natural language</p>
+        <button className="retag-btn" onClick={handleRetagAll} disabled={retagLoading}>
+          {retagLoading ? 'Retagging…' : 'Retag All'}
+        </button>
       </header>
 
       {error && <div className="error-banner">{error}</div>}

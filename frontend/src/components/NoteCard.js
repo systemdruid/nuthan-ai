@@ -28,6 +28,13 @@ function NoteCard({ note, onDelete, highlighted }) {
         </button>
       </div>
       <p className="note-content">{note.content}</p>
+      {note.tags && note.tags.length > 0 && (
+        <div className="note-tags">
+          {note.tags.map(tag => (
+            <span key={tag.id} className={`tag tag-${tag.source}`}>{tag.name}</span>
+          ))}
+        </div>
+      )}
       <div className="note-footer">
         <span className="note-date">
           {new Date(note.created_at).toLocaleDateString()}

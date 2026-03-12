@@ -74,6 +74,28 @@ classify_chain = ChatPromptTemplate.from_messages([
     ("human", CLASSIFY_HUMAN_TEMPLATE),
 ]) | _llm | StrOutputParser()
 
+# --- Tagging chain ---
+
+TAG_SYSTEM_PROMPT = """You are a smart assistant that generates concise tags for notes and tasks.
+
+Given the content of a note or task, return 2-5 relevant tags as ONLY valid JSON:
+{{
+  "tags": ["tag1", "tag2"]
+}}
+
+Guidelines:
+- Tags must be lowercase, 1-2 words, use hyphens instead of spaces (e.g. "follow-up", "work", "finance")
+- Be specific but reusable across many notes
+- Do not include any text outside the JSON object."""
+
+TAG_HUMAN_TEMPLATE = """Note content:
+{content}"""
+
+tag_chain = ChatPromptTemplate.from_messages([
+    ("system", TAG_SYSTEM_PROMPT),
+    ("human", TAG_HUMAN_TEMPLATE),
+]) | _llm | StrOutputParser()
+
 
 def _parse_json(raw_response):
     text = raw_response.strip()
@@ -130,3 +152,18 @@ def classify_note(content):
     except Exception:
         logger.exception("classify_note failed; using defaults")
         return {"type": "note", "urgent": False, "important": False, "remind_at": None}
+
+
+def tag_note(content):
+    """Return a list of lowercase tag name strings inferred from content.
+
+    Falls back to an empty list on any error.
+    """
+    try:
+        raw_response = tag_chain.invoke({"content": content})
+        result = _parse_json(raw_response)
+        tags = result.get("tags", [])
+        return [t.lower().strip() for t in tags if isinstance(t, str) and t.strip()]
+    except Exception:
+        logger.exception("tag_note failed; returning no tags")
+        return []

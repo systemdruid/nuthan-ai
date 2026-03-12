@@ -11,3 +11,5 @@ export const deleteNote = (id) => axios.delete(`${BASE}/${id}/`);
 
 export const queryNotes = (query) =>
   axios.post(`${BASE}/query/`, { query }).then(r => r.data);
+
+export const retagAll = () => axios.post(`${BASE}/retag-all/`).then(r => r.data);

@@ -31,6 +31,17 @@ header p {
   margin-top: 6px;
 }
 
+.retag-btn {
+  margin-top: 12px;
+  background: #6b7280;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+}
+
+.retag-btn:hover:not(:disabled) {
+  background: #4b5563;
+}
+
 main {
   display: grid;
   grid-template-columns: 400px 1fr;
@@ -214,6 +225,32 @@ button:disabled {
   line-height: 1.5;
   white-space: pre-wrap;
   margin-bottom: 8px;
+}
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.tag {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.tag-ai {
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.tag-user {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
 .note-footer {

@@ -583,6 +583,22 @@ button:disabled {
   border: 1px solid #bbf7d0;
 }
 
+.tag-ai-claimable {
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.tag-ai-claimable:hover:not(:disabled) {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.tag-ai-claimable:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
 .note-footer {
   display: flex;
   justify-content: space-between;

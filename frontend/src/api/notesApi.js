@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const BASE = `${API_URL}/api/notes`;
+const TAGS_BASE = `${API_URL}/api/tags`;
 
 export const getNotes = () => axios.get(`${BASE}/`).then(r => r.data);
 
@@ -17,4 +18,7 @@ export const queryNotes = (query) =>
 export const retagAll = () => axios.post(`${BASE}/retag-all/`).then(r => r.data);
 
 export const searchTags = (search) =>
-  axios.get(`${BASE}/tags/`, { params: { search } }).then(r => r.data);
+  axios.get(`${TAGS_BASE}/`, { params: { search } }).then(r => r.data);
+
+export const convertTagToUser = (id) =>
+  axios.post(`${TAGS_BASE}/${id}/convert-to-user/`).then(r => r.data);

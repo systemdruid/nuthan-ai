@@ -7,15 +7,17 @@ function toDatetimeLocal(isoString) {
   return isoString.slice(0, 16);
 }
 
-function NoteCard({ note, onDelete, onUpdate, highlighted }) {
+function NoteCard({ note, onDelete, onUpdate, onConvertTag, highlighted }) {
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Edit state
   const [editContent, setEditContent] = useState('');
   const [editUserTags, setEditUserTags] = useState([]);
+  const [editAiTags, setEditAiTags] = useState([]);
   const [editRemindAt, setEditRemindAt] = useState('');
   const [saving, setSaving] = useState(false);
+  const [convertingTagId, setConvertingTagId] = useState(null);
 
   const userTags = note.tags ? note.tags.filter(t => t.source === 'user') : [];
   const aiTags = note.tags ? note.tags.filter(t => t.source === 'ai') : [];
@@ -23,9 +25,19 @@ function NoteCard({ note, onDelete, onUpdate, highlighted }) {
   const startEdit = () => {
     setEditContent(note.content);
     setEditUserTags(userTags.map(t => t.name));
+    setEditAiTags(aiTags);
     setEditRemindAt(toDatetimeLocal(note.remind_at));
     setEditing(true);
     setConfirmDelete(false);
+  };
+
+  const handleConvertAiTag = async (tag) => {
+    // Optimistic update first so the UI responds immediately
+    setEditAiTags(prev => prev.filter(t => t.id !== tag.id));
+    setEditUserTags(prev => prev.includes(tag.name) ? prev : [...prev, tag.name]);
+    setConvertingTagId(tag.id);
+    await onConvertTag(tag.id);
+    setConvertingTagId(null);
   };
 
   const cancelEdit = () => setEditing(false);
@@ -61,12 +73,21 @@ function NoteCard({ note, onDelete, onUpdate, highlighted }) {
         />
         <label className="edit-label">Your tags</label>
         <TagInput tags={editUserTags} onChange={setEditUserTags} />
-        {aiTags.length > 0 && (
+        {editAiTags.length > 0 && (
           <div className="edit-ai-tags">
-            <span className="edit-label">AI tags</span>
+            <span className="edit-label">AI tags — click to claim</span>
             <div className="note-tags">
-              {aiTags.map(tag => (
-                <span key={tag.id} className="tag tag-ai">{tag.name}</span>
+              {editAiTags.map(tag => (
+                <button
+                  key={tag.id}
+                  type="button"
+                  className="tag tag-ai tag-ai-claimable"
+                  onClick={() => handleConvertAiTag(tag)}
+                  disabled={convertingTagId === tag.id}
+                  title="Click to convert to your tag"
+                >
+                  {tag.name}
+                </button>
               ))}
             </div>
           </div>

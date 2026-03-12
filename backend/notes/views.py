@@ -25,6 +25,18 @@ class TagListView(generics.ListAPIView):
         return qs.order_by('name')[:20]
 
 
+class TagConvertToUserView(APIView):
+    def post(self, request, pk):
+        try:
+            tag = Tag.objects.get(pk=pk)
+        except Tag.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        updated = NoteTag.objects.filter(tag=tag, source=NoteTag.Source.AI).update(
+            source=NoteTag.Source.USER
+        )
+        return Response({'tag': tag.name, 'updated_associations': updated})
+
+
 class NoteListCreateView(generics.ListCreateAPIView):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer

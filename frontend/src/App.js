@@ -6,6 +6,7 @@ import {
   updateNote,
   queryNotes,
   retagAll,
+  convertTagToUser,
 } from "./api/notesApi";
 import NoteForm from "./components/NoteForm";
 import NoteList from "./components/NoteList";
@@ -108,6 +109,24 @@ function App() {
     }
   };
 
+  const handleConvertTag = async (tagId) => {
+    try {
+      await convertTagToUser(tagId);
+      // Update all notes in state that carry this tag — flip source to 'user'
+      setNotes(prev =>
+        prev.map(note => ({
+          ...note,
+          tags: (note.tags || []).map(t =>
+            t.id === tagId ? { ...t, source: 'user' } : t
+          ),
+        }))
+      );
+      setError(null);
+    } catch (err) {
+      setError('Failed to convert tag.');
+    }
+  };
+
   const handleRetagAll = async () => {
     setRetagLoading(true);
     try {
@@ -174,6 +193,7 @@ function App() {
               notes={filterNotes(notes.filter((n) => n.type === "task"))}
               onDelete={handleDelete}
               onUpdate={handleUpdate}
+              onConvertTag={handleConvertTag}
               highlightedIds={highlightedIds}
               emptyMessage="No tasks yet."
             />
@@ -183,6 +203,7 @@ function App() {
               notes={filterNotes(notes.filter((n) => n.type === "note"))}
               onDelete={handleDelete}
               onUpdate={handleUpdate}
+              onConvertTag={handleConvertTag}
               highlightedIds={highlightedIds}
               emptyMessage="No notes yet. Add one!"
             />

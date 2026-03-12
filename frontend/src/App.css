@@ -130,10 +130,37 @@ button:disabled {
   margin-bottom: 32px;
 }
 
-.section-block h2 {
-  font-size: 1.1rem;
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
   color: #444;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0;
   margin-bottom: 14px;
+  cursor: pointer;
+}
+
+.section-toggle:hover {
+  color: #1a1a2e;
+  background: none;
+}
+
+.section-toggle-arrow {
+  font-size: 0.65rem;
+  color: #888;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.section-toggle-arrow.open {
+  transform: rotate(90deg);
+}
+
+.section-body {
+  margin-top: 4px;
 }
 
 .note-list {

@@ -1,9 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getNotes, createNote, deleteNote, updateNote, queryNotes, retagAll } from './api/notesApi';
-import NoteForm from './components/NoteForm';
-import NoteList from './components/NoteList';
-import QueryBar from './components/QueryBar';
-import QueryResults from './components/QueryResults';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  getNotes,
+  createNote,
+  deleteNote,
+  updateNote,
+  queryNotes,
+  retagAll,
+} from "./api/notesApi";
+import NoteForm from "./components/NoteForm";
+import NoteList from "./components/NoteList";
+import QueryBar from "./components/QueryBar";
+import QueryResults from "./components/QueryResults";
+
+function CollapsibleSection({ title, children }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="section-block">
+      <button className="section-toggle" onClick={() => setOpen(o => !o)}>
+        <span className={`section-toggle-arrow ${open ? 'open' : ''}`}>▶</span>
+        {title}
+      </button>
+      {open && <div className="section-body">{children}</div>}
+    </div>
+  );
+}
 
 function App() {
   const [notes, setNotes] = useState([]);
@@ -17,7 +37,7 @@ function App() {
       const data = await getNotes();
       setNotes(data);
     } catch (err) {
-      setError('Failed to load notes.');
+      setError("Failed to load notes.");
     }
   }, []);
 
@@ -31,39 +51,41 @@ function App() {
       await fetchNotes();
       setError(null);
     } catch (err) {
-      setError('Failed to create note.');
+      setError("Failed to create note.");
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await deleteNote(id);
-      setNotes(prev => prev.filter(n => n.id !== id));
+      setNotes((prev) => prev.filter((n) => n.id !== id));
       if (queryResults) {
-        setQueryResults(prev => ({
+        setQueryResults((prev) => ({
           ...prev,
-          relevant_notes: prev.relevant_notes.filter(n => n.id !== id),
+          relevant_notes: prev.relevant_notes.filter((n) => n.id !== id),
         }));
       }
       setError(null);
     } catch (err) {
-      setError('Failed to delete note.');
+      setError("Failed to delete note.");
     }
   };
 
   const handleUpdate = async (id, data) => {
     try {
       const updated = await updateNote(id, data);
-      setNotes(prev => prev.map(n => n.id === id ? updated : n));
+      setNotes((prev) => prev.map((n) => (n.id === id ? updated : n)));
       if (queryResults) {
-        setQueryResults(prev => ({
+        setQueryResults((prev) => ({
           ...prev,
-          relevant_notes: prev.relevant_notes.map(n => n.id === id ? updated : n),
+          relevant_notes: prev.relevant_notes.map((n) =>
+            n.id === id ? updated : n,
+          ),
         }));
       }
       setError(null);
     } catch (err) {
-      setError('Failed to update note.');
+      setError("Failed to update note.");
     }
   };
 
@@ -78,7 +100,7 @@ function App() {
       setQueryResults(results);
       setError(null);
     } catch (err) {
-      setError('AI query failed. Check your API key.');
+      setError("AI query failed. Check your API key.");
     } finally {
       setQueryLoading(false);
     }
@@ -91,14 +113,14 @@ function App() {
       await fetchNotes();
       setError(null);
     } catch (err) {
-      setError('Retag failed.');
+      setError("Retag failed.");
     } finally {
       setRetagLoading(false);
     }
   };
 
   const highlightedIds = queryResults
-    ? queryResults.relevant_notes.map(n => n.id)
+    ? queryResults.relevant_notes.map((n) => n.id)
     : [];
 
   return (
@@ -106,8 +128,12 @@ function App() {
       <header>
         <h1>AI Notes</h1>
         <p>Save notes and find them using natural language</p>
-        <button className="retag-btn" onClick={handleRetagAll} disabled={retagLoading}>
-          {retagLoading ? 'Retagging…' : 'Retag All'}
+        <button
+          className="retag-btn"
+          onClick={handleRetagAll}
+          disabled={retagLoading}
+        >
+          {retagLoading ? "Retagging…" : "Retag All"}
         </button>
       </header>
 
@@ -123,26 +149,24 @@ function App() {
         </section>
 
         <section className="right-panel">
-          <div className="section-block">
-            <h2>Notes ({notes.filter(n => n.type === 'note').length})</h2>
+          <CollapsibleSection title={`Tasks (${notes.filter((n) => n.type === "task").length})`}>
             <NoteList
-              notes={notes.filter(n => n.type === 'note')}
-              onDelete={handleDelete}
-              onUpdate={handleUpdate}
-              highlightedIds={highlightedIds}
-              emptyMessage="No notes yet. Add one!"
-            />
-          </div>
-          <div className="section-block">
-            <h2>Tasks ({notes.filter(n => n.type === 'task').length})</h2>
-            <NoteList
-              notes={notes.filter(n => n.type === 'task')}
+              notes={notes.filter((n) => n.type === "task")}
               onDelete={handleDelete}
               onUpdate={handleUpdate}
               highlightedIds={highlightedIds}
               emptyMessage="No tasks yet."
             />
-          </div>
+          </CollapsibleSection>
+          <CollapsibleSection title={`Notes (${notes.filter((n) => n.type === "note").length})`}>
+            <NoteList
+              notes={notes.filter((n) => n.type === "note")}
+              onDelete={handleDelete}
+              onUpdate={handleUpdate}
+              highlightedIds={highlightedIds}
+              emptyMessage="No notes yet. Add one!"
+            />
+          </CollapsibleSection>
         </section>
       </main>
     </div>

@@ -11,6 +11,7 @@ import NoteForm from "./components/NoteForm";
 import NoteList from "./components/NoteList";
 import QueryBar from "./components/QueryBar";
 import QueryResults from "./components/QueryResults";
+import TagFilter from "./components/TagFilter";
 
 function CollapsibleSection({ title, children }) {
   const [open, setOpen] = useState(true);
@@ -27,6 +28,7 @@ function CollapsibleSection({ title, children }) {
 
 function App() {
   const [notes, setNotes] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [queryResults, setQueryResults] = useState(null);
   const [queryLoading, setQueryLoading] = useState(false);
   const [retagLoading, setRetagLoading] = useState(false);
@@ -123,6 +125,19 @@ function App() {
     ? queryResults.relevant_notes.map((n) => n.id)
     : [];
 
+  const allTags = Array.from(
+    new Map(
+      notes.flatMap((n) => n.tags || []).map((t) => [t.name, t])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  const filterNotes = (list) =>
+    selectedTags.length === 0
+      ? list
+      : list.filter((n) =>
+          selectedTags.some((name) => (n.tags || []).some((t) => t.name === name))
+        );
+
   return (
     <div className="app">
       <header>
@@ -149,18 +164,23 @@ function App() {
         </section>
 
         <section className="right-panel">
-          <CollapsibleSection title={`Tasks (${notes.filter((n) => n.type === "task").length})`}>
+          <TagFilter
+            allTags={allTags}
+            selectedTags={selectedTags}
+            onChange={setSelectedTags}
+          />
+          <CollapsibleSection title={`Tasks (${filterNotes(notes.filter((n) => n.type === "task")).length})`}>
             <NoteList
-              notes={notes.filter((n) => n.type === "task")}
+              notes={filterNotes(notes.filter((n) => n.type === "task"))}
               onDelete={handleDelete}
               onUpdate={handleUpdate}
               highlightedIds={highlightedIds}
               emptyMessage="No tasks yet."
             />
           </CollapsibleSection>
-          <CollapsibleSection title={`Notes (${notes.filter((n) => n.type === "note").length})`}>
+          <CollapsibleSection title={`Notes (${filterNotes(notes.filter((n) => n.type === "note")).length})`}>
             <NoteList
-              notes={notes.filter((n) => n.type === "note")}
+              notes={filterNotes(notes.filter((n) => n.type === "note"))}
               onDelete={handleDelete}
               onUpdate={handleUpdate}
               highlightedIds={highlightedIds}

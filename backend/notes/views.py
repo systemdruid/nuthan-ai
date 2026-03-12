@@ -1,21 +1,28 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Note, Tag
-from .serializers import NoteSerializer, NoteQuerySerializer
+from .models import Note, Tag, NoteTag
+from .serializers import NoteSerializer, NoteQuerySerializer, TagSerializer
 from .ai_service import find_relevant_notes, classify_note, tag_note
 
 
 def _apply_ai_tags(note, content):
-    """Generate AI tags for a note, replacing any previously AI-assigned tags."""
-    tag_names = tag_note(content)
-    ai_tags = []
-    for name in tag_names:
-        tag, _ = Tag.objects.get_or_create(name=name, defaults={'source': Tag.Source.AI})
-        ai_tags.append(tag)
-    # Remove old AI tags, keep user tags, then add new AI tags
-    note.tags.remove(*note.tags.filter(source=Tag.Source.AI))
-    note.tags.add(*ai_tags)
+    """Replace AI-sourced tag associations; user-assigned tags are untouched."""
+    NoteTag.objects.filter(note=note, source=NoteTag.Source.AI).delete()
+    for name in tag_note(content):
+        tag, _ = Tag.objects.get_or_create(name=name)
+        NoteTag.objects.get_or_create(note=note, tag=tag, defaults={'source': NoteTag.Source.AI})
+
+
+class TagListView(generics.ListAPIView):
+    serializer_class = TagSerializer
+
+    def get_queryset(self):
+        search = self.request.query_params.get('search', '').strip()
+        qs = Tag.objects.all()
+        if search:
+            qs = qs.filter(name__icontains=search)
+        return qs.order_by('name')[:20]
 
 
 class NoteListCreateView(generics.ListCreateAPIView):
@@ -25,6 +32,15 @@ class NoteListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         classification = classify_note(serializer.validated_data.get('content', ''))
         note = serializer.save(**classification)
+
+        # Apply user-provided tags first
+        for name in self.request.data.get('tag_names', []):
+            name = name.lower().strip()
+            if name:
+                tag, _ = Tag.objects.get_or_create(name=name)
+                NoteTag.objects.get_or_create(note=note, tag=tag, defaults={'source': NoteTag.Source.USER})
+
+        # AI tags fill in the rest (won't overwrite user tags due to unique_together)
         _apply_ai_tags(note, note.content)
 
 

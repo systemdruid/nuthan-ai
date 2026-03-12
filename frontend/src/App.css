@@ -227,6 +227,100 @@ button:disabled {
   margin-bottom: 8px;
 }
 
+/* Tag input */
+.tag-input-wrapper {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.tag-input-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  min-height: 42px;
+  cursor: text;
+  transition: border-color 0.2s;
+}
+
+.tag-input-box:focus-within {
+  border-color: #4a90e2;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.tag-pill-remove {
+  background: none;
+  border: none;
+  color: #818cf8;
+  padding: 0;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.tag-pill-remove:hover {
+  color: #4f46e5;
+  background: none;
+}
+
+.tag-input-field {
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 80px;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  background: transparent;
+}
+
+.tag-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  list-style: none;
+  z-index: 100;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.tag-suggestions li {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.tag-suggestions li:hover {
+  background: #f0f4ff;
+  color: #4f46e5;
+}
+
+/* Note tags (on card) */
 .note-tags {
   display: flex;
   flex-wrap: wrap;

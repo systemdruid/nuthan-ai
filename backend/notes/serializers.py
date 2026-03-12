@@ -5,11 +5,17 @@ from .models import Note, Tag
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['id', 'name', 'source']
+        fields = ['id', 'name']
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True, read_only=True)
+    tags = serializers.SerializerMethodField()
+
+    def get_tags(self, obj):
+        return [
+            {'id': nt.tag.id, 'name': nt.tag.name, 'source': nt.source}
+            for nt in obj.notetag_set.select_related('tag').all()
+        ]
 
     class Meta:
         model = Note

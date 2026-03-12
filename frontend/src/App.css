@@ -196,6 +196,7 @@ button:disabled {
   display: flex;
   gap: 4px;
   align-items: center;
+  margin-left: auto;
 }
 
 .edit-btn {
@@ -277,32 +278,6 @@ button:disabled {
   background: #d1d5db;
 }
 
-.note-badges {
-  display: flex;
-  gap: 6px;
-  flex: 1;
-}
-
-.badge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.badge-urgent {
-  background: #fff0f0;
-  color: #c53030;
-  border: 1px solid #feb2b2;
-}
-
-.badge-important {
-  background: #fffbea;
-  color: #b7791f;
-  border: 1px solid #f6e05e;
-}
 
 .note-content {
   color: #555;

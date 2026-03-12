@@ -53,15 +53,11 @@ CLASSIFY_SYSTEM_PROMPT = """You are a smart assistant that classifies note conte
 Given the content of a note, extract the following fields and respond with ONLY valid JSON:
 {{
   "type": "note" or "task",
-  "urgent": true or false,
-  "important": true or false,
   "remind_at": "ISO 8601 datetime string" or null
 }}
 
 Guidelines:
 - type: use "task" if the content describes something to do (action items, todos, reminders to act). Use "note" for everything else.
-- urgent: true if the content signals time-sensitivity (e.g. "ASAP", "urgent", "deadline", "immediately", "by today", "by tomorrow").
-- important: true if the content signals high priority or significance (e.g. "important", "critical", "must", "key", "priority", "essential").
 - remind_at: if a specific future date/time is mentioned, return it as an ISO 8601 string (e.g. "2026-03-15T09:00:00"). Use null if no specific time is mentioned. Today's date is {today}.
 
 Do not include any text outside the JSON object."""
@@ -145,13 +141,11 @@ def classify_note(content):
         result = _parse_json(raw_response)
         return {
             "type": result.get("type", "note") if result.get("type") in ("note", "task") else "note",
-            "urgent": bool(result.get("urgent", False)),
-            "important": bool(result.get("important", False)),
             "remind_at": result.get("remind_at") or None,
         }
     except Exception:
         logger.exception("classify_note failed; using defaults")
-        return {"type": "note", "urgent": False, "important": False, "remind_at": None}
+        return {"type": "note", "remind_at": None}
 
 
 def tag_note(content):

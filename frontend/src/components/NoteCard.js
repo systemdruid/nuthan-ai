@@ -93,10 +93,6 @@ function NoteCard({ note, onDelete, onUpdate, highlighted }) {
   return (
     <div className={`note-card ${highlighted ? 'highlighted' : ''}`}>
       <div className="note-header">
-        <div className="note-badges">
-          {note.urgent && <span className="badge badge-urgent">Urgent</span>}
-          {note.important && <span className="badge badge-important">Important</span>}
-        </div>
         <div className="note-actions">
           <button className="edit-btn" onClick={startEdit} title="Edit">✎</button>
           <button

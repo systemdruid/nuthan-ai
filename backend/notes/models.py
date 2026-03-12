@@ -19,8 +19,6 @@ class Note(models.Model):
         choices=NoteType.choices,
         default=NoteType.NOTE,
     )
-    urgent = models.BooleanField(default=False)
-    important = models.BooleanField(default=False)
     remind_at = models.DateTimeField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, through='NoteTag', blank=True, related_name='notes')
     created_at = models.DateTimeField(auto_now_add=True)

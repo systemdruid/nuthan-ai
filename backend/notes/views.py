@@ -3,12 +3,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Note
 from .serializers import NoteSerializer, NoteQuerySerializer
-from .ai_service import find_relevant_notes
+from .ai_service import find_relevant_notes, classify_note
 
 
 class NoteListCreateView(generics.ListCreateAPIView):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
+
+    def perform_create(self, serializer):
+        classification = classify_note(serializer.validated_data.get('content', ''))
+        serializer.save(**classification)
 
 
 class NoteDetailView(generics.RetrieveDestroyAPIView):

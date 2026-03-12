@@ -115,7 +115,11 @@ button:disabled {
 }
 
 /* Note list */
-.right-panel h2 {
+.section-block {
+  margin-bottom: 32px;
+}
+
+.section-block h2 {
   font-size: 1.1rem;
   color: #444;
   margin-bottom: 14px;
@@ -177,6 +181,33 @@ button:disabled {
   padding: 4px 8px;
 }
 
+.note-badges {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-urgent {
+  background: #fff0f0;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+.badge-important {
+  background: #fffbea;
+  color: #b7791f;
+  border: 1px solid #f6e05e;
+}
+
 .note-content {
   color: #555;
   font-size: 0.9rem;
@@ -185,9 +216,22 @@ button:disabled {
   margin-bottom: 8px;
 }
 
+.note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .note-date {
   font-size: 0.78rem;
   color: #aaa;
+}
+
+.note-remind {
+  font-size: 0.78rem;
+  color: #4a90e2;
 }
 
 /* Query results */

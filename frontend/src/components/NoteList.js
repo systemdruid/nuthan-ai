@@ -1,9 +1,9 @@
 import React from 'react';
 import NoteCard from './NoteCard';
 
-function NoteList({ notes, onDelete, highlightedIds }) {
+function NoteList({ notes, onDelete, highlightedIds, emptyMessage = 'Nothing here yet.' }) {
   if (notes.length === 0) {
-    return <p className="empty-message">No notes yet. Add one above!</p>;
+    return <p className="empty-message">{emptyMessage}</p>;
   }
 
   return (

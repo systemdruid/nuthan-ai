@@ -90,12 +90,24 @@ function App() {
         </section>
 
         <section className="right-panel">
-          <h2>All Notes ({notes.length})</h2>
-          <NoteList
-            notes={notes}
-            onDelete={handleDelete}
-            highlightedIds={highlightedIds}
-          />
+          <div className="section-block">
+            <h2>Notes ({notes.filter(n => n.type === 'note').length})</h2>
+            <NoteList
+              notes={notes.filter(n => n.type === 'note')}
+              onDelete={handleDelete}
+              highlightedIds={highlightedIds}
+              emptyMessage="No notes yet. Add one!"
+            />
+          </div>
+          <div className="section-block">
+            <h2>Tasks ({notes.filter(n => n.type === 'task').length})</h2>
+            <NoteList
+              notes={notes.filter(n => n.type === 'task')}
+              onDelete={handleDelete}
+              highlightedIds={highlightedIds}
+              emptyMessage="No tasks yet."
+            />
+          </div>
         </section>
       </main>
     </div>

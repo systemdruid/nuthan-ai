@@ -14,8 +14,13 @@ output "s3_bucket_name" {
 }
 
 output "frontend_url" {
-  description = "S3 static website URL"
+  description = "S3 static website URL (HTTP only — use cloudfront_url for HTTPS)"
   value       = "http://${aws_s3_bucket_website_configuration.frontend.website_endpoint}"
+}
+
+output "cloudfront_url" {
+  description = "CloudFront HTTPS URL for the frontend"
+  value       = "https://${aws_cloudfront_distribution.frontend.domain_name}"
 }
 
 output "ssh_command" {

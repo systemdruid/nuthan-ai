@@ -1,0 +1,7 @@
+aws_region        = "us-east-1"
+project_name      = "nuthan-ai"
+key_pair_name     = "my-aws-keypair"   # must already exist in your AWS account
+db_name           = "notesdb"
+db_username       = "notesuser"
+db_password       = "changeme123!"     # pick a strong password
+anthropic_api_key = "sk-ant-..."

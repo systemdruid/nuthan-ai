@@ -22,3 +22,10 @@ postgres_data/
 # macOS
 .DS_Store
 .idea/
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/*.tfstate
+terraform/*.tfstate.backup

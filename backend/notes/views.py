@@ -31,35 +31,39 @@ class TagConvertToUserView(APIView):
             tag = Tag.objects.get(pk=pk)
         except Tag.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        updated = NoteTag.objects.filter(tag=tag, source=NoteTag.Source.AI).update(
-            source=NoteTag.Source.USER
-        )
+        updated = NoteTag.objects.filter(
+            tag=tag,
+            source=NoteTag.Source.AI,
+            note__user=request.user,
+        ).update(source=NoteTag.Source.USER)
         return Response({'tag': tag.name, 'updated_associations': updated})
 
 
 class NoteListCreateView(generics.ListCreateAPIView):
-    queryset = Note.objects.all()
     serializer_class = NoteSerializer
+
+    def get_queryset(self):
+        return Note.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         classification = classify_note(serializer.validated_data.get('content', ''))
-        note = serializer.save(**classification)
+        note = serializer.save(user=self.request.user, **classification)
 
-        # Apply user-provided tags first
         for name in self.request.data.get('tag_names', []):
             name = name.lower().strip()
             if name:
                 tag, _ = Tag.objects.get_or_create(name=name)
                 NoteTag.objects.get_or_create(note=note, tag=tag, defaults={'source': NoteTag.Source.USER})
 
-        # AI tags fill in the rest (won't overwrite user tags due to unique_together)
         _apply_ai_tags(note, note.content)
 
 
 class NoteDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Note.objects.all()
     serializer_class = NoteSerializer
     http_method_names = ['get', 'patch', 'delete']
+
+    def get_queryset(self):
+        return Note.objects.filter(user=self.request.user)
 
     def perform_update(self, serializer):
         note = serializer.save()
@@ -74,7 +78,7 @@ class NoteDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class NoteRetagAllView(APIView):
     def post(self, request):
-        notes = Note.objects.all()
+        notes = Note.objects.filter(user=request.user)
         for note in notes:
             _apply_ai_tags(note, note.content)
         return Response({"retagged": notes.count()})
@@ -87,11 +91,11 @@ class NoteQueryView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         query = serializer.validated_data['query']
-        all_notes = Note.objects.all()
+        all_notes = Note.objects.filter(user=request.user)
 
         relevant_ids, explanation = find_relevant_notes(all_notes, query)
 
-        relevant_notes = Note.objects.filter(id__in=relevant_ids)
+        relevant_notes = Note.objects.filter(id__in=relevant_ids, user=request.user)
         note_serializer = NoteSerializer(relevant_notes, many=True)
 
         return Response({

@@ -38,3 +38,8 @@ variable "anthropic_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "google_client_id" {
+  description = "Google OAuth 2.0 Client ID for sign-in"
+  type        = string
+}

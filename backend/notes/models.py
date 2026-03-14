@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -13,6 +14,12 @@ class Note(models.Model):
         NOTE = 'note', 'Note'
         TASK = 'task', 'Task'
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='notes',
+    )
     content = models.TextField()
     type = models.CharField(
         max_length=10,

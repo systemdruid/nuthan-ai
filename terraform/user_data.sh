@@ -23,6 +23,7 @@ POSTGRES_DB=${db_name}
 POSTGRES_USER=${db_user}
 POSTGRES_PASSWORD=${db_password}
 POSTGRES_HOST=${db_host}
+GOOGLE_CLIENT_ID=${google_client_id}
 EOF
 
 chmod 600 /app/.env

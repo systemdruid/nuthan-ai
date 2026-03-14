@@ -617,6 +617,16 @@ button:disabled {
   color: #4a90e2;
 }
 
+.note-remind--today {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.note-remind--overdue {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
 /* Query results */
 .query-results {
   background: white;

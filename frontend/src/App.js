@@ -190,7 +190,12 @@ function App() {
           />
           <CollapsibleSection title={`Tasks (${filterNotes(notes.filter((n) => n.type === "task")).length})`}>
             <NoteList
-              notes={filterNotes(notes.filter((n) => n.type === "task"))}
+              notes={filterNotes(notes.filter((n) => n.type === "task")).slice().sort((a, b) => {
+                if (!a.remind_at && !b.remind_at) return 0;
+                if (!a.remind_at) return 1;
+                if (!b.remind_at) return -1;
+                return new Date(a.remind_at) - new Date(b.remind_at);
+              })}
               onDelete={handleDelete}
               onUpdate={handleUpdate}
               onConvertTag={handleConvertTag}

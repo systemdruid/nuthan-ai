@@ -137,11 +137,18 @@ function NoteCard({ note, onDelete, onUpdate, onConvertTag, highlighted }) {
         <span className="note-date">
           {new Date(note.created_at).toLocaleDateString()}
         </span>
-        {note.remind_at && (
-          <span className="note-remind">
-            Remind: {new Date(note.remind_at).toLocaleString()}
-          </span>
-        )}
+        {note.remind_at && (() => {
+            const remindDate = new Date(note.remind_at);
+            const now = new Date();
+            const isToday = remindDate.toDateString() === now.toDateString();
+            const isPast = remindDate < now;
+            const remindClass = isPast ? 'note-remind--overdue' : isToday ? 'note-remind--today' : '';
+            return (
+              <span className={`note-remind ${remindClass}`}>
+                Remind: {remindDate.toLocaleString()}
+              </span>
+            );
+          })()}
       </div>
     </div>
   );

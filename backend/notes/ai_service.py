@@ -15,9 +15,15 @@ _llm = ChatAnthropic(
 
 # --- Query chain ---
 
-SYSTEM_PROMPT = """You are a smart notes assistant. You help users find relevant notes based on their queries.
+SYSTEM_PROMPT = """You are a smart notes assistant. You help users find relevant notes and tasks based on their queries.
 
-Given a list of notes and a user query, identify which notes are most relevant.
+Given a list of notes/tasks and a user query, identify which are most relevant.
+
+Each entry may include:
+- ID, Type (note/task), Content
+- Remind At: the scheduled datetime for a task (ISO 8601). For time-based queries (e.g. "this week", "tomorrow", "next month"), prioritise matching the Remind At field over the content text.
+
+Today's date is {today}.
 
 You MUST respond with ONLY valid JSON in this exact format:
 {{
@@ -33,7 +39,7 @@ If no notes are relevant, return:
 
 Do not include any text outside the JSON object."""
 
-NOTE_QUERY_TEMPLATE = """Here are all the available notes:
+NOTE_QUERY_TEMPLATE = """Here are all the available notes and tasks:
 
 {notes_context}
 
@@ -45,6 +51,7 @@ chain = ChatPromptTemplate.from_messages([
     ("system", SYSTEM_PROMPT),
     ("human", NOTE_QUERY_TEMPLATE),
 ]) | _llm | StrOutputParser()
+
 
 # --- Classification chain ---
 
@@ -106,14 +113,21 @@ def find_relevant_notes(notes, query):
     if not notes:
         return [], "No notes available to search."
 
-    notes_context = "\n\n".join([
-        f"ID: {note.id}\nContent: {note.content}"
-        for note in notes
-    ])
+    from datetime import date
+    today = date.today().isoformat()
+
+    def _note_context(note):
+        lines = [f"ID: {note.id}", f"Type: {note.type}", f"Content: {note.content}"]
+        if note.remind_at:
+            lines.append(f"Remind At: {note.remind_at.isoformat()}")
+        return "\n".join(lines)
+
+    notes_context = "\n\n".join([_note_context(n) for n in notes])
 
     raw_response = chain.invoke({
         "notes_context": notes_context,
         "query": query,
+        "today": today,
     })
 
     try:

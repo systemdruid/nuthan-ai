@@ -188,6 +188,7 @@ resource "aws_instance" "backend" {
     db_password       = var.db_password
     anthropic_api_key = var.anthropic_api_key
     google_client_id  = var.google_client_id
+    google_android_client_id  = var.google_android_client_id
   })
 
   tags = { Name = "${var.project_name}-backend" }

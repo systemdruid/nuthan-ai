@@ -6,3 +6,4 @@ db_username       = "notesuser"
 db_password       = "changeme123!"     # pick a strong password
 anthropic_api_key = "sk-ant-..."
 google_client_id  = "xxxx.apps.googleusercontent.com"
+google_android_client_id = "xxxx.apps.googleusercontent.com"

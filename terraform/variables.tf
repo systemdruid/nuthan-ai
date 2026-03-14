@@ -43,3 +43,8 @@ variable "google_client_id" {
   description = "Google OAuth 2.0 Client ID for sign-in"
   type        = string
 }
+
+variable "google_android_client_id" {
+  description = "Google OAuth 2.0 Client ID for sign-in"
+  type        = string
+}

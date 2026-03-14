@@ -45,6 +45,8 @@
   - `key_pair_name` — name of the key pair created in Phase 2
   - `db_password` — choose a strong password (min 8 chars, no `@` or `/`)
   - `anthropic_api_key` — from [console.anthropic.com](https://console.anthropic.com)
+  - `google_client_id` — Web OAuth 2.0 Client ID from Google Cloud Console
+  - `google_android_client_id` — Android OAuth 2.0 Client ID from Google Cloud Console
   - Leave `db_name`, `db_username`, `project_name` at defaults or customise
 
 ---
@@ -108,10 +110,12 @@
 
 ## Phase 7 — Build and deploy the frontend
 
-- [ ] On your **local machine**, build the React app pointed at the live backend:
+- [ ] On your **local machine**, build the React app pointed at the CloudFront URL (use `cloudfront_url` from Terraform outputs — this avoids mixed-content errors since CloudFront proxies `/api/*` to EC2 over HTTPS):
   ```bash
   cd frontend
-  REACT_APP_API_URL=http://<backend_ip>:8000 npm run build
+  REACT_APP_API_URL=https://<cloudfront_url> \
+  REACT_APP_GOOGLE_CLIENT_ID=<google_client_id> \
+  npm run build
   ```
 - [ ] Upload the build to S3:
   ```bash

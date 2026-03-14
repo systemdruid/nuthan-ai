@@ -37,6 +37,11 @@ If no notes are relevant, return:
   "explanation": "No notes found matching your query"
 }}
 
+Rules for the explanation:
+- Never mention note/task IDs — users don't know them.
+- Refer to tasks/notes by their content (e.g. "your dentist appointment", "the meeting note").
+- Keep it concise (1-2 sentences).
+
 Do not include any text outside the JSON object."""
 
 NOTE_QUERY_TEMPLATE = """Here are all the available notes and tasks:
@@ -117,9 +122,11 @@ def find_relevant_notes(notes, query):
     today = date.today().isoformat()
 
     def _note_context(note):
+        from datetime import datetime, timezone
         lines = [f"ID: {note.id}", f"Type: {note.type}", f"Content: {note.content}"]
         if note.remind_at:
-            lines.append(f"Remind At: {note.remind_at.isoformat()}")
+            dt = datetime.fromtimestamp(note.remind_at, tz=timezone.utc)
+            lines.append(f"Remind At: {dt.isoformat()}")
         return "\n".join(lines)
 
     notes_context = "\n\n".join([_note_context(n) for n in notes])
@@ -153,9 +160,20 @@ def classify_note(content):
     try:
         raw_response = classify_chain.invoke({"content": content, "today": today})
         result = _parse_json(raw_response)
+        remind_at_iso = result.get("remind_at") or None
+        remind_at_unix = None
+        if remind_at_iso:
+            from datetime import datetime, timezone
+            try:
+                dt = datetime.fromisoformat(remind_at_iso.replace('Z', '+00:00'))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                remind_at_unix = int(dt.timestamp())
+            except (ValueError, AttributeError):
+                pass
         return {
             "type": result.get("type", "note") if result.get("type") in ("note", "task") else "note",
-            "remind_at": result.get("remind_at") or None,
+            "remind_at": remind_at_unix,
         }
     except Exception:
         logger.exception("classify_note failed; using defaults")

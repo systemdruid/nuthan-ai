@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import TagInput from './TagInput';
 
-function toDatetimeLocal(isoString) {
-  if (!isoString) return '';
-  // datetime-local needs "YYYY-MM-DDTHH:MM"
-  return isoString.slice(0, 16);
+function toDatetimeLocal(unixTs) {
+  if (!unixTs) return '';
+  const d = new Date(unixTs * 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function NoteCard({ note, onDelete, onUpdate, onConvertTag, highlighted }) {
@@ -47,7 +48,7 @@ function NoteCard({ note, onDelete, onUpdate, onConvertTag, highlighted }) {
     await onUpdate(note.id, {
       content: editContent.trim(),
       tag_names: editUserTags,
-      remind_at: editRemindAt || null,
+      remind_at: editRemindAt ? Math.floor(new Date(editRemindAt).getTime() / 1000) : null,
     });
     setSaving(false);
     setEditing(false);
@@ -138,7 +139,7 @@ function NoteCard({ note, onDelete, onUpdate, onConvertTag, highlighted }) {
           {new Date(note.created_at).toLocaleDateString()}
         </span>
         {note.remind_at && (() => {
-            const remindDate = new Date(note.remind_at);
+            const remindDate = new Date(note.remind_at * 1000);
             const now = new Date();
             const isToday = remindDate.toDateString() === now.toDateString();
             const isPast = remindDate < now;

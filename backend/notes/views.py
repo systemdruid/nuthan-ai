@@ -47,6 +47,9 @@ class NoteListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         classification = classify_note(serializer.validated_data.get('content', ''))
+        # Don't let AI override a remind_at the user explicitly set
+        if serializer.validated_data.get('remind_at'):
+            classification.pop('remind_at', None)
         note = serializer.save(user=self.request.user, **classification)
 
         for name in self.request.data.get('tag_names', []):

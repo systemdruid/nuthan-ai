@@ -26,7 +26,7 @@ class Note(models.Model):
         choices=NoteType.choices,
         default=NoteType.NOTE,
     )
-    remind_at = models.DateTimeField(null=True, blank=True)
+    remind_at = models.BigIntegerField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, through='NoteTag', blank=True, related_name='notes')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

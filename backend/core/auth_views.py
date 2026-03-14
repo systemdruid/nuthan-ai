@@ -16,14 +16,25 @@ class GoogleLoginView(APIView):
         if not credential:
             return Response({'error': 'credential required'}, status=400)
 
-        try:
-            id_info = id_token.verify_oauth2_token(
-                credential,
-                google_requests.Request(),
-                settings.GOOGLE_CLIENT_ID,
-            )
-        except ValueError as e:
-            return Response({'error': str(e)}, status=400)
+        client_ids = [settings.GOOGLE_CLIENT_ID]
+        if hasattr(settings, 'GOOGLE_ANDROID_CLIENT_ID') and settings.GOOGLE_ANDROID_CLIENT_ID:
+            client_ids.append(settings.GOOGLE_ANDROID_CLIENT_ID)
+
+        id_info = None
+        last_error = None
+        for cid in client_ids:
+            try:
+                id_info = id_token.verify_oauth2_token(
+                    credential,
+                    google_requests.Request(),
+                    cid,
+                )
+                break
+            except ValueError as e:
+                last_error = e
+
+        if id_info is None:
+            return Response({'error': str(last_error)}, status=400)
 
         email = id_info['email']
         name = id_info.get('name', email)

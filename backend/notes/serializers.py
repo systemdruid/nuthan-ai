@@ -10,6 +10,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class NoteSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
+    remind_at = serializers.IntegerField(allow_null=True, required=False)
 
     def get_tags(self, obj):
         return [

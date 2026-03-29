@@ -58,8 +58,6 @@ class NoteListCreateView(generics.ListCreateAPIView):
                 tag, _ = Tag.objects.get_or_create(name=name)
                 NoteTag.objects.get_or_create(note=note, tag=tag, defaults={'source': NoteTag.Source.USER})
 
-        _apply_ai_tags(note, note.content)
-
 
 class NoteDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = NoteSerializer

@@ -48,3 +48,9 @@ variable "google_android_client_id" {
   description = "Google OAuth 2.0 Client ID for sign-in"
   type        = string
 }
+
+variable "git_repo_url" {
+  description = "Git remote URL (with embedded PAT for private repos) used to clone the backend on first boot"
+  type        = string
+  sensitive   = true
+}

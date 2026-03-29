@@ -67,44 +67,28 @@
 
 ## Phase 6 — Deploy the backend
 
-- [ ] SSH into the EC2 instance (use the `ssh_command` output):
+`user_data.sh` now runs automatically on first boot — it installs Docker, writes `.env`, clones the repo using `git_repo_url`, and starts the containers. No manual SSH required for the initial deploy.
+
+- [ ] Wait ~3–5 minutes after `terraform apply` for the instance to boot and finish setup
+- [ ] Tail cloud-init logs to watch progress (optional):
   ```bash
-  ssh -i ~/.ssh/<keypair>.pem ec2-user@<backend_ip>
-  ```
-- [ ] Wait for the user_data bootstrap to finish (Docker install takes ~2 min):
-  ```bash
-  tail -f /var/log/cloud-init-output.log
+  ssh -i ~/.ssh/<keypair>.pem ec2-user@<backend_ip> \
+    "tail -f /var/log/cloud-init-output.log"
   # Wait until you see "Bootstrap done"
-  ```
-- [ ] Take ownership of `/app` (root created it during bootstrap):
-  ```bash
-  sudo chown ec2-user:ec2-user /app
-  ```
-- [ ] Pull the repository into `/app` (directory already exists with `.env`):
-  ```bash
-  cd /app
-  git init
-  git remote set-url origin https://systemdruid:<your-token>@github.com/systemdruid/nuthan-ai.git
-  git pull origin main
-  ```
-- [ ] Confirm `.env` was written by Terraform:
-  ```bash
-  cat .env   # should show all five variables
-  ```
-- [ ] Start the backend container:
-  ```bash
-  docker compose -f docker-compose.prod.yml up -d --build
-  ```
-- [ ] Verify it is running and migrations applied:
-  ```bash
-  docker compose -f docker-compose.prod.yml logs -f
-  # Should show "Starting development server at http://0.0.0.0:8000"
   ```
 - [ ] Smoke-test from your local machine:
   ```bash
   curl http://<backend_ip>:8000/api/notes/
   # Should return []
   ```
+
+### Redeploying after code changes
+
+Run the helper script from the `terraform/` directory:
+```bash
+./deploy.sh ~/.ssh/<keypair>.pem
+```
+This SSHs in, does `git pull origin main`, and restarts the containers.
 
 ---
 

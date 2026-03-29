@@ -182,13 +182,14 @@ resource "aws_instance" "backend" {
   key_name               = var.key_pair_name
 
   user_data = templatefile("${path.module}/user_data.sh", {
-    db_host           = aws_db_instance.postgres.address
-    db_name           = var.db_name
-    db_user           = var.db_username
-    db_password       = var.db_password
-    anthropic_api_key = var.anthropic_api_key
-    google_client_id  = var.google_client_id
-    google_android_client_id  = var.google_android_client_id
+    db_host                  = aws_db_instance.postgres.address
+    db_name                  = var.db_name
+    db_user                  = var.db_username
+    db_password              = var.db_password
+    anthropic_api_key        = var.anthropic_api_key
+    google_client_id         = var.google_client_id
+    google_android_client_id = var.google_android_client_id
+    git_repo_url             = var.git_repo_url
   })
 
   tags = { Name = "${var.project_name}-backend" }

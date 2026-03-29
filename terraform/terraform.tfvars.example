@@ -7,3 +7,4 @@ db_password       = "changeme123!"     # pick a strong password
 anthropic_api_key = "sk-ant-..."
 google_client_id  = "xxxx.apps.googleusercontent.com"
 google_android_client_id = "xxxx.apps.googleusercontent.com"
+git_repo_url             = "https://<github-user>:<github-pat>@github.com/<org>/<repo>.git"

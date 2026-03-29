@@ -31,6 +31,7 @@ done
 
 ssh $SSH_OPTS ec2-user@"$BACKEND_IP" bash <<'REMOTE'
 set -euo pipefail
+docker system prune -f
 cd /app
 git pull origin main
 docker compose -f docker-compose.prod.yml up -d --build

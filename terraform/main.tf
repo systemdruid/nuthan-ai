@@ -181,6 +181,11 @@ resource "aws_instance" "backend" {
   vpc_security_group_ids = [aws_security_group.ec2.id]
   key_name               = var.key_pair_name
 
+  root_block_device {
+    volume_size = 8
+    volume_type = "gp2"
+  }
+
   user_data = templatefile("${path.module}/user_data.sh", {
     db_host                  = aws_db_instance.postgres.address
     db_name                  = var.db_name

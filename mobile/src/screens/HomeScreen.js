@@ -7,6 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import NoteCard from '../components/NoteCard';
 import NoteFormModal from '../components/NoteFormModal';
 import TagFilterBar from '../components/TagFilterBar';
+import PreferencesModal from '../components/PreferencesModal';
+import { Feather } from '@expo/vector-icons';
 import {
   getNotes, createNote, deleteNote, updateNote, queryNotes,
 } from '../api/notesApi';
@@ -37,6 +39,7 @@ export default function HomeScreen({ user, onLogout }) {
   const [isOffline, setIsOffline] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [preferences, setPreferences] = useState({ follow_up_interval_hours: 1 });
+  const [prefsVisible, setPrefsVisible] = useState(false);
 
   const fetchNotes = useCallback(async () => {
     try {
@@ -180,9 +183,14 @@ export default function HomeScreen({ user, onLogout }) {
           <Text style={styles.appName}>Recallio AI</Text>
           <Text style={styles.userName}>{user?.name || user?.email}</Text>
         </View>
-        <TouchableOpacity style={styles.logoutBtn} onPress={onLogout}>
-          <Text style={styles.logoutText}>Sign out</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.iconBtn} onPress={() => setPrefsVisible(true)}>
+            <Feather name="settings" size={20} color="#6b7280" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.logoutBtn} onPress={onLogout}>
+            <Text style={styles.logoutText}>Sign out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Offline banner */}
@@ -258,6 +266,20 @@ export default function HomeScreen({ user, onLogout }) {
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
+      {/* Preferences modal */}
+      <PreferencesModal
+        visible={prefsVisible}
+        preferences={preferences}
+        onClose={() => setPrefsVisible(false)}
+        onSave={(updated) => {
+          setPreferences(updated);
+          schedulePendingTasksReminder(
+            notes.filter(n => n.type === 'task').length,
+            updated.follow_up_interval_hours,
+          );
+        }}
+      />
+
       {/* Create / Edit modal */}
       <NoteFormModal
         visible={formVisible}
@@ -278,6 +300,12 @@ const styles = StyleSheet.create({
   },
   appName: { fontSize: 20, fontWeight: '700', color: '#1a1a2e' },
   userName: { fontSize: 12, color: '#6b7280', marginTop: 2 },
+  headerActions: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+  },
+  iconBtn: {
+    padding: 6,
+  },
   logoutBtn: {
     paddingHorizontal: 12, paddingVertical: 6,
     borderRadius: 6, borderWidth: 1, borderColor: '#d1d5db',

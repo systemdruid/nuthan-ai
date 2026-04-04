@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -64,7 +65,7 @@ export default function NoteCard({ note, onEdit, onDelete }) {
         </View>
         <View style={styles.actions}>
           <TouchableOpacity style={styles.editBtn} onPress={() => onEdit(note)}>
-            <Text style={styles.editBtnText}>✏️</Text>
+            <Feather name="edit-2" size={16} color="#374151" />
           </TouchableOpacity>
           {note.type === 'task' ? (
             <TouchableOpacity style={styles.completeBtn} onPress={() => onDelete(note.id)}>

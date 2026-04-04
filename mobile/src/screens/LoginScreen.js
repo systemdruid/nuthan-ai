@@ -26,15 +26,16 @@ export default function LoginScreen({ onLogin }) {
   });
 
   useEffect(() => {
-    if (response?.type === 'success') {
-      const idToken =
-        response.authentication?.idToken ||
-        response.params?.id_token;
-      if (idToken) {
-        handleLogin(idToken);
-      } else {
-        Alert.alert('Login failed', 'No ID token returned from Google.');
-      }
+    if (!response) return;
+    if (response.type !== 'success') {
+      Alert.alert('Login failed', `Google response: ${response.type}\n${JSON.stringify(response.error ?? '')}`);
+      return;
+    }
+    const idToken = response.authentication?.idToken || response.params?.id_token;
+    if (idToken) {
+      handleLogin(idToken);
+    } else {
+      Alert.alert('Login failed', 'No ID token returned from Google.');
     }
   }, [response]);
 
@@ -45,7 +46,8 @@ export default function LoginScreen({ onLogin }) {
       await storeAuth(data.access, data.user);
       onLogin(data.user);
     } catch (e) {
-      Alert.alert('Login failed', 'Could not sign in. Please try again.');
+      const msg = e?.response?.data ? JSON.stringify(e.response.data) : e?.message;
+      Alert.alert('Login failed', msg || 'Could not sign in. Please try again.');
     } finally {
       setLoading(false);
     }

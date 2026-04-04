@@ -37,7 +37,7 @@ ANTHROPIC_API_KEY=${anthropic_api_key}
 POSTGRES_DB=${db_name}
 POSTGRES_USER=${db_user}
 POSTGRES_PASSWORD=${db_password}
-POSTGRES_HOST=${db_host}
+POSTGRES_HOST=db
 GOOGLE_CLIENT_ID=${google_client_id}
 GOOGLE_ANDROID_CLIENT_ID=${google_android_client_id}
 EOF

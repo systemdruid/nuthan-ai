@@ -3,10 +3,6 @@ output "backend_ip" {
   value       = aws_eip.backend.public_ip
 }
 
-output "rds_endpoint" {
-  description = "RDS hostname (used as POSTGRES_HOST)"
-  value       = aws_db_instance.postgres.address
-}
 
 output "s3_bucket_name" {
   description = "S3 bucket — upload your React build/ here"

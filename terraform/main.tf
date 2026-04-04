@@ -44,20 +44,6 @@ resource "aws_subnet" "public" {
   tags = { Name = "${var.project_name}-public" }
 }
 
-# Two private subnets in different AZs — required by RDS subnet group
-resource "aws_subnet" "private_a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "${var.aws_region}a"
-  tags              = { Name = "${var.project_name}-private-a" }
-}
-
-resource "aws_subnet" "private_b" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.3.0/24"
-  availability_zone = "${var.aws_region}b"
-  tags              = { Name = "${var.project_name}-private-b" }
-}
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
@@ -106,58 +92,6 @@ resource "aws_security_group" "ec2" {
   tags = { Name = "${var.project_name}-ec2-sg" }
 }
 
-resource "aws_security_group" "rds" {
-  name        = "${var.project_name}-rds-sg"
-  description = "PostgreSQL access from EC2 only"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    description     = "PostgreSQL from EC2"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ec2.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = { Name = "${var.project_name}-rds-sg" }
-}
-
-# ─── RDS PostgreSQL ───────────────────────────────────────────────────────────
-
-resource "aws_db_subnet_group" "main" {
-  name       = "${var.project_name}-db-subnet-group"
-  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
-  tags       = { Name = "${var.project_name}-db-subnet-group" }
-}
-
-resource "aws_db_instance" "postgres" {
-  identifier        = "${var.project_name}-db"
-  engine            = "postgres"
-  engine_version    = "15"
-  instance_class    = "db.t3.micro"   # free-tier eligible
-  allocated_storage = 20
-  storage_type      = "gp2"
-
-  db_name  = var.db_name
-  username = var.db_username
-  password = var.db_password
-
-  db_subnet_group_name   = aws_db_subnet_group.main.name
-  vpc_security_group_ids = [aws_security_group.rds.id]
-
-  publicly_accessible     = false
-  skip_final_snapshot     = true
-  backup_retention_period = 0
-
-  tags = { Name = "${var.project_name}-db" }
-}
 
 # ─── EC2 Backend ──────────────────────────────────────────────────────────────
 
@@ -182,12 +116,11 @@ resource "aws_instance" "backend" {
   key_name               = var.key_pair_name
 
   root_block_device {
-    volume_size = 8
+    volume_size = 30
     volume_type = "gp2"
   }
 
   user_data = templatefile("${path.module}/user_data.sh", {
-    db_host                  = aws_db_instance.postgres.address
     db_name                  = var.db_name
     db_user                  = var.db_username
     db_password              = var.db_password

@@ -1,9 +1,39 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Note, Tag, NoteTag
+from .models import Note, Tag, NoteTag, UserProfile
 from .serializers import NoteSerializer, NoteQuerySerializer, TagSerializer
 from .ai_service import find_relevant_notes, classify_note, tag_note
+
+DEFAULT_PREFERENCES = {
+    'follow_up_interval_hours': 1,
+}
+
+
+class UserPreferencesView(APIView):
+    def _get_profile(self, user):
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        # Backfill any missing keys with defaults
+        updated = False
+        for key, value in DEFAULT_PREFERENCES.items():
+            if key not in profile.preferences:
+                profile.preferences[key] = value
+                updated = True
+        if updated:
+            profile.save()
+        return profile
+
+    def get(self, request):
+        profile = self._get_profile(request.user)
+        return Response(profile.preferences)
+
+    def patch(self, request):
+        profile = self._get_profile(request.user)
+        for key in DEFAULT_PREFERENCES:
+            if key in request.data:
+                profile.preferences[key] = request.data[key]
+        profile.save()
+        return Response(profile.preferences)
 
 
 def _apply_ai_tags(note, content):

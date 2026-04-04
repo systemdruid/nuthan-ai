@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, SectionList, TouchableOpacity, StyleSheet,
-  RefreshControl, Alert, TextInput, ActivityIndicator,
+  RefreshControl, Alert, TextInput, ActivityIndicator, AppState,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NoteCard from '../components/NoteCard';
@@ -10,7 +10,9 @@ import TagFilterBar from '../components/TagFilterBar';
 import {
   getNotes, createNote, deleteNote, updateNote, queryNotes,
 } from '../api/notesApi';
-import { scheduleReminder, cancelReminder } from '../notifications';
+import { getPendingCount } from '../cache/syncQueue';
+import { scheduleReminder, cancelReminder, schedulePendingTasksReminder } from '../notifications';
+import { getPreferences } from '../api/authApi';
 
 function SectionHeader({ title, open, onToggle }) {
   return (
@@ -32,17 +34,37 @@ export default function HomeScreen({ user, onLogout }) {
   const [query, setQuery] = useState('');
   const [queryResults, setQueryResults] = useState(null);
   const [queryLoading, setQueryLoading] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [preferences, setPreferences] = useState({ follow_up_interval_hours: 1 });
 
   const fetchNotes = useCallback(async () => {
     try {
-      const data = await getNotes();
+      const { notes: data, offline } = await getNotes();
       setNotes(data);
+      setIsOffline(offline);
+      setPendingCount(await getPendingCount());
+      schedulePendingTasksReminder(
+        data.filter(n => n.type === 'task').length,
+        preferences.follow_up_interval_hours,
+      );
     } catch (e) {
       if (e.response?.status === 401) onLogout();
     }
   }, [onLogout]);
 
-  useEffect(() => { fetchNotes(); }, [fetchNotes]);
+  useEffect(() => {
+    getPreferences().then(setPreferences).catch(() => {});
+    fetchNotes();
+  }, [fetchNotes]);
+
+  // Re-sync whenever the app comes back to the foreground
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') fetchNotes();
+    });
+    return () => sub.remove();
+  }, [fetchNotes]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -55,11 +77,16 @@ export default function HomeScreen({ user, onLogout }) {
       if (editingNote) {
         const updated = await updateNote(editingNote.id, data);
         setNotes(prev => prev.map(n => n.id === editingNote.id ? updated : n));
-        await scheduleReminder(updated.id, updated.remind_at, updated.content);
+        setPendingCount(await getPendingCount());
+        if (!updated._pending) {
+          await scheduleReminder(updated.id, updated.remind_at, updated.content);
+        }
       } else {
         const created = await createNote(data);
         await fetchNotes();
-        await scheduleReminder(created.id, created.remind_at, created.content);
+        if (!created._pending) {
+          await scheduleReminder(created.id, created.remind_at, created.content);
+        }
       }
       setFormVisible(false);
       setEditingNote(null);
@@ -69,14 +96,21 @@ export default function HomeScreen({ user, onLogout }) {
   };
 
   const handleDelete = (id) => {
-    Alert.alert('Delete', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive', onPress: async () => {
+    const isTask = notes.find(n => n.id === id)?.type === 'task';
+    Alert.alert(
+      isTask ? 'Complete Task' : 'Delete',
+      isTask ? 'Mark this task as complete?' : 'Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: isTask ? 'Complete' : 'Delete', style: 'destructive', onPress: async () => {
           try {
             await deleteNote(id);
             await cancelReminder(id);
             setNotes(prev => prev.filter(n => n.id !== id));
+            setPendingCount(await getPendingCount());
+            const remainingTasks = notes.filter(n => n.id !== id && n.type === 'task').length;
+            schedulePendingTasksReminder(remainingTasks, preferences.follow_up_interval_hours);
             if (queryResults) {
               setQueryResults(prev => ({
                 ...prev,
@@ -86,9 +120,10 @@ export default function HomeScreen({ user, onLogout }) {
           } catch {
             Alert.alert('Error', 'Failed to delete.');
           }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const handleEdit = (note) => {
@@ -149,6 +184,17 @@ export default function HomeScreen({ user, onLogout }) {
           <Text style={styles.logoutText}>Sign out</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Offline banner */}
+      {isOffline && (
+        <View style={styles.offlineBanner}>
+          <Text style={styles.offlineText}>
+            {pendingCount > 0
+              ? `Offline · ${pendingCount} change${pendingCount !== 1 ? 's' : ''} pending sync`
+              : 'Offline · showing cached data'}
+          </Text>
+        </View>
+      )}
 
       {/* Query bar */}
       <View style={styles.queryRow}>
@@ -273,4 +319,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2, shadowRadius: 6, elevation: 6,
   },
   fabText: { color: '#fff', fontSize: 28, lineHeight: 32 },
+  offlineBanner: {
+    backgroundColor: '#f59e0b',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  offlineText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
 });

@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = 'note_notification_ids';
+const HOURLY_KEY = 'hourly_tasks_reminder_id';
 const CHANNEL_ID = 'reminders';
 
 // Show notification even when app is in foreground
@@ -66,6 +67,39 @@ export async function scheduleReminder(noteId, remindAt, content) {
   const map = await _loadMap();
   map[String(noteId)] = notifId;
   await _saveMap(map);
+}
+
+// intervalHours: positive number = repeat interval; null/0 = disabled
+export async function schedulePendingTasksReminder(taskCount, intervalHours) {
+  await cancelPendingTasksReminder();
+  if (taskCount <= 0 || !intervalHours) return;
+
+  const notifId = await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'Pending Tasks',
+      body: `You have ${taskCount} pending task${taskCount !== 1 ? 's' : ''}`,
+      sound: 'default',
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: intervalHours * 3600,
+      repeats: true,
+      channelId: CHANNEL_ID,
+    },
+  });
+
+  await AsyncStorage.setItem(HOURLY_KEY, notifId);
+}
+
+export async function cancelPendingTasksReminder() {
+  try {
+    const notifId = await AsyncStorage.getItem(HOURLY_KEY);
+    if (notifId) {
+      await Notifications.cancelScheduledNotificationAsync(notifId);
+      await AsyncStorage.removeItem(HOURLY_KEY);
+    }
+  } catch {}
 }
 
 export async function cancelReminder(noteId) {

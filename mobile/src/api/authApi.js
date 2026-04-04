@@ -20,3 +20,18 @@ export const getStoredAuth = async () => {
 export const clearAuth = async () => {
   await AsyncStorage.multiRemove(['access_token', 'auth_user']);
 };
+
+const authHeader = async () => {
+  const token = await AsyncStorage.getItem('access_token');
+  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+};
+
+export const getPreferences = async () => {
+  const c = await authHeader();
+  return axios.get(`${API_URL}/api/preferences/`, c).then(r => r.data);
+};
+
+export const updatePreferences = async (prefs) => {
+  const c = await authHeader();
+  return axios.patch(`${API_URL}/api/preferences/`, prefs, c).then(r => r.data);
+};

@@ -29,6 +29,11 @@ export default function NoteCard({ note, onEdit, onDelete }) {
 
   return (
     <View style={styles.card}>
+      {note._pending && (
+        <View style={styles.pendingBadge}>
+          <Text style={styles.pendingText}>⟳ Pending sync</Text>
+        </View>
+      )}
       <Text style={styles.content}>{note.content}</Text>
 
       {(userTags.length > 0 || aiTags.length > 0) && (
@@ -59,11 +64,17 @@ export default function NoteCard({ note, onEdit, onDelete }) {
         </View>
         <View style={styles.actions}>
           <TouchableOpacity style={styles.editBtn} onPress={() => onEdit(note)}>
-            <Text style={styles.editBtnText}>Edit</Text>
+            <Text style={styles.editBtnText}>✏️</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteBtn} onPress={() => onDelete(note.id)}>
-            <Text style={styles.deleteBtnText}>Delete</Text>
-          </TouchableOpacity>
+          {note.type === 'task' ? (
+            <TouchableOpacity style={styles.completeBtn} onPress={() => onDelete(note.id)}>
+              <Text style={styles.completeBtnText}>Complete</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.deleteBtn} onPress={() => onDelete(note.id)}>
+              <Text style={styles.deleteBtnText}>Delete</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -160,5 +171,27 @@ const styles = StyleSheet.create({
   deleteBtnText: {
     fontSize: 13,
     color: '#dc2626',
+  },
+  pendingBadge: {
+    backgroundColor: '#fef3c7',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  pendingText: {
+    fontSize: 11,
+    color: '#92400e',
+  },
+  completeBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: '#dcfce7',
+  },
+  completeBtnText: {
+    fontSize: 13,
+    color: '#16a34a',
   },
 });
